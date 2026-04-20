@@ -1,0 +1,2721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Work Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f1ea;
+    --bg-paper: #fbf8f2;
+    --ink: #1a1915;
+    --ink-soft: #4a4842;
+    --ink-faint: #8a877e;
+    --rule: #d9d3c4;
+    --rule-soft: #e8e2d3;
+    --accent: #1a1915;
+
+    /* Category accents */
+    --cat-market: #2d5a3d;      /* deep green */
+    --cat-hq: #8b2e2e;           /* burgundy */
+    --cat-cre: #1f3a5f;          /* navy */
+    --cat-asset: #a65d1e;        /* amber */
+    --cat-market-bg: #e8efe8;
+    --cat-hq-bg: #f2e5e5;
+    --cat-cre-bg: #e5ebf2;
+    --cat-asset-bg: #f5ebe0;
+
+    --shadow-sm: 0 1px 2px rgba(26,25,21,0.04), 0 1px 3px rgba(26,25,21,0.06);
+    --shadow-md: 0 2px 4px rgba(26,25,21,0.05), 0 4px 12px rgba(26,25,21,0.08);
+    --shadow-lg: 0 4px 8px rgba(26,25,21,0.06), 0 12px 24px rgba(26,25,21,0.1);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', -apple-system, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(166,93,30,0.03) 0%, transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(31,58,95,0.03) 0%, transparent 40%);
+  }
+
+  /* Paper grain */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.4;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.1 0 0 0 0 0.1 0 0 0 0 0.08 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    z-index: 1;
+  }
+
+  .app { position: relative; z-index: 2; }
+
+  /* Header */
+  header {
+    padding: 36px 40px 28px;
+    border-bottom: 1px solid var(--rule);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .title-block h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 44px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-variation-settings: "opsz" 144;
+  }
+
+  .title-block .subtitle {
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--ink-soft);
+    letter-spacing: 0.01em;
+  }
+
+  .title-block .subtitle em {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  .header-meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .toolbar {
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    padding: 8px 14px;
+    background: var(--bg-paper);
+    border: 1px solid var(--rule);
+    color: var(--ink);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border-radius: 2px;
+  }
+
+  .btn:hover {
+    background: var(--ink);
+    color: var(--bg-paper);
+    border-color: var(--ink);
+  }
+
+  .btn-primary {
+    background: var(--ink);
+    color: var(--bg-paper);
+    border-color: var(--ink);
+  }
+
+  .btn-primary:hover {
+    background: var(--ink-soft);
+    border-color: var(--ink-soft);
+  }
+
+  /* Auto-save indicator */
+  .save-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .save-indicator::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--cat-market);
+  }
+
+  .save-indicator.saving::before {
+    background: var(--cat-asset);
+    animation: pulse 1s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* Board */
+  .board {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(280px, 1fr));
+    gap: 24px;
+    padding: 28px 40px 80px;
+    align-items: start;
+  }
+
+  @media (max-width: 1200px) {
+    .board { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 700px) {
+    .board { grid-template-columns: 1fr; padding: 20px; }
+    header { padding: 24px 20px 20px; }
+    .title-block h1 { font-size: 32px; }
+  }
+
+  /* Column */
+  .column {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .column-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+    cursor: grab;
+  }
+
+  .column-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.9;
+  }
+
+  .column-header::before {
+    background: var(--col-bg, var(--rule-soft));
+  }
+
+  .column-header > * { position: relative; z-index: 1; }
+
+  .column.dragging {
+    opacity: 0.4;
+  }
+
+  .column.drop-before {
+    box-shadow: -3px 0 0 0 var(--ink);
+  }
+
+  .column.drop-after {
+    box-shadow: 3px 0 0 0 var(--ink);
+  }
+
+  .column-header:active { cursor: grabbing; }
+
+  .col-drag-handle {
+    color: var(--ink-faint);
+    font-size: 12px;
+    line-height: 1;
+    padding: 4px 2px;
+    user-select: none;
+    letter-spacing: -2px;
+    cursor: grab;
+    flex-shrink: 0;
+  }
+
+  .col-drag-handle:active { cursor: grabbing; }
+
+  .column-title {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .column-name {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    color: var(--col-accent, var(--ink));
+    background: transparent;
+    border: none;
+    outline: none;
+    padding: 2px 4px;
+    border-radius: 2px;
+    min-width: 40px;
+    flex: 1;
+  }
+
+  .column-name[readonly] {
+    cursor: default;
+    pointer-events: none;
+  }
+
+  .column-name.editing {
+    background: #fffbe8;
+    box-shadow: 0 0 0 2px #fffbe8;
+  }
+
+  .column-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-faint);
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+
+  .column-actions {
+    display: flex;
+    gap: 2px;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .column-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--ink-soft);
+    padding: 3px 7px;
+    border-radius: 2px;
+    line-height: 1;
+    transition: all 0.15s;
+  }
+
+  .column-btn:hover {
+    background: rgba(0,0,0,0.12);
+    color: var(--ink);
+  }
+
+  .column-btn.delete:hover {
+    color: var(--cat-hq);
+  }
+
+  .column-btn.big {
+    font-size: 18px;
+  }
+
+  /* Add Column placeholder */
+  .add-column {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: 12px 16px;
+    background: transparent;
+    border: 1px dashed var(--rule);
+    color: var(--ink-faint);
+    cursor: pointer;
+    font-family: 'Fraunces', serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    border-radius: 2px;
+    transition: all 0.15s;
+    align-self: start;
+    margin-top: 0;
+    width: 100%;
+  }
+
+  .add-column:hover {
+    border-color: var(--ink-soft);
+    color: var(--ink);
+    background: var(--bg-paper);
+  }
+
+  /* Entries */
+  .entries {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-height: 20px;
+    min-width: 0;
+  }
+
+  .entry {
+    background: var(--bg-paper);
+    border: 1px solid var(--rule-soft);
+    border-radius: 2px;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+    min-width: 0;
+  }
+
+  .entry:hover {
+    box-shadow: var(--shadow-md);
+  }
+
+  .entry.dragging {
+    opacity: 0.5;
+    transform: rotate(1deg);
+  }
+
+  .entry-row {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    gap: 8px;
+    cursor: pointer;
+  }
+
+  .drag-handle {
+    color: var(--ink-faint);
+    cursor: grab;
+    font-size: 12px;
+    line-height: 1;
+    padding: 4px 2px;
+    user-select: none;
+    letter-spacing: -2px;
+  }
+
+  .drag-handle:active { cursor: grabbing; }
+
+  .entry-toggle {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: var(--ink-soft);
+    font-size: 10px;
+    width: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.15s;
+  }
+
+  .entry.expanded > .entry-row > .entry-toggle {
+    transform: rotate(90deg);
+  }
+
+  .entry-title {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: inherit;
+    padding: 2px 4px;
+    border-radius: 2px;
+    min-width: 0;
+  }
+
+  .entry-title[readonly] {
+    cursor: default;
+    pointer-events: none;
+  }
+
+  .entry-title.editing {
+    background: #fffbe8;
+    box-shadow: 0 0 0 2px #fffbe8;
+  }
+
+  .entry-dates {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0 12px 8px 30px;
+  }
+
+  .date-toggle {
+    display: inline-block;
+  }
+
+  .date-toggle.clickable {
+    cursor: pointer;
+    border-bottom: 1px dotted var(--ink-faint);
+    transition: color 0.15s, border-color 0.15s;
+  }
+
+  .date-toggle.clickable:hover {
+    color: var(--ink-soft);
+    border-bottom-color: var(--ink-soft);
+  }
+
+  .entry-meta {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--ink-faint);
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .entry-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 5px;
+    color: var(--ink-faint);
+    border-radius: 2px;
+    font-size: 11px;
+    line-height: 1;
+    transition: all 0.15s;
+  }
+
+  .entry-icon:hover {
+    background: rgba(0,0,0,0.06);
+    color: var(--ink);
+  }
+
+  .entry-icon.delete:hover {
+    color: var(--cat-hq);
+  }
+
+  .comment-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 10px;
+  }
+
+  /* Entry body (when expanded) */
+  .entry-body {
+    display: none;
+    padding: 0 12px 12px 30px;
+    border-top: 1px dashed var(--rule-soft);
+    margin-top: -1px;
+  }
+
+  .entry.expanded > .entry-body {
+    display: block;
+  }
+
+  .description {
+    padding: 10px 0;
+  }
+
+  .description-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+
+  .description-text {
+    font-size: 12px;
+    color: var(--ink-soft);
+    line-height: 1.55;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    min-height: 20px;
+    padding: 6px 8px;
+    border-radius: 2px;
+    transition: background 0.15s;
+  }
+
+  .inline-link {
+    color: var(--col-accent, var(--ink));
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+    text-decoration-color: rgba(0,0,0,0.3);
+    transition: text-decoration-color 0.15s;
+    word-break: break-all;
+  }
+
+  .inline-link:hover {
+    text-decoration-color: currentColor;
+  }
+
+  .description-text[contenteditable="false"] {
+    cursor: default;
+  }
+
+  .description-text[contenteditable="true"] {
+    cursor: text;
+    background: #fffbe8;
+    outline: none;
+  }
+
+  .description-text:empty::before {
+    content: 'No description yet.';
+    color: var(--ink-faint);
+    font-style: italic;
+  }
+
+  .description-text[contenteditable="true"]:empty::before {
+    content: 'Write a description…';
+  }
+
+  .description-date {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .edit-action {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 6px;
+    color: var(--ink-soft);
+    font-size: 11px;
+    line-height: 1;
+    border-radius: 2px;
+    transition: all 0.15s;
+  }
+
+  .edit-action:hover {
+    background: rgba(0,0,0,0.06);
+    color: var(--ink);
+  }
+
+  .edit-action.active {
+    background: var(--ink);
+    color: var(--bg-paper);
+  }
+
+  .edit-action.active:hover {
+    background: var(--ink-soft);
+  }
+
+  /* Comments */
+  .comments {
+    padding-top: 6px;
+  }
+
+  .comment {
+    padding: 8px 10px;
+    background: rgba(0,0,0,0.02);
+    border-left: 2px solid var(--rule);
+    margin-bottom: 6px;
+    border-radius: 0 2px 2px 0;
+  }
+
+  .comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+
+  .comment-date {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .comment-delete {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--ink-faint);
+    font-size: 11px;
+    padding: 0 4px;
+  }
+
+  .comment-delete:hover { color: var(--cat-hq); }
+
+  .comment-text {
+    font-size: 12px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .comment-input-row {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .comment-input {
+    flex: 1;
+    padding: 6px 8px;
+    border: 1px solid var(--rule);
+    background: var(--bg-paper);
+    font-family: inherit;
+    font-size: 12px;
+    color: var(--ink);
+    border-radius: 2px;
+    outline: none;
+    resize: vertical;
+    min-height: 28px;
+    max-height: 120px;
+  }
+
+  .comment-input:focus {
+    border-color: var(--ink-soft);
+  }
+
+  .comment-submit {
+    padding: 4px 10px;
+    background: var(--ink);
+    color: var(--bg-paper);
+    border: none;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 2px;
+    align-self: flex-start;
+  }
+
+  .comment-submit:hover {
+    background: var(--ink-soft);
+  }
+
+  /* Drag-over state */
+  .entries.drag-over {
+    background: rgba(0,0,0,0.03);
+    border-radius: 2px;
+  }
+
+  .entry.drop-before {
+    border-top: 2px solid var(--ink);
+  }
+
+  .entry.drop-after {
+    border-bottom: 2px solid var(--ink);
+  }
+
+  /* File input hidden */
+  #import-file { display: none; }
+
+  /* Trash Bin Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26,25,21,0.35);
+    backdrop-filter: blur(3px);
+    z-index: 200;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 60px 20px;
+    overflow-y: auto;
+  }
+
+  .modal-overlay.open {
+    display: flex;
+  }
+
+  .modal {
+    background: var(--bg-paper);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    box-shadow: var(--shadow-lg);
+    max-width: 720px;
+    width: 100%;
+    max-height: calc(100vh - 120px);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .modal-header {
+    padding: 20px 28px;
+    border-bottom: 1px solid var(--rule);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .modal-header h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 24px;
+    letter-spacing: -0.01em;
+    font-variation-settings: "opsz" 144;
+  }
+
+  .modal-subtitle {
+    font-size: 11px;
+    color: var(--ink-faint);
+    font-family: 'JetBrains Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 4px;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .modal-body {
+    padding: 16px 28px 28px;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .trash-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--ink-faint);
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 16px;
+  }
+
+  .trash-section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin: 16px 0 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--rule-soft);
+  }
+
+  .trash-section-label:first-child { margin-top: 0; }
+
+  .trash-item {
+    padding: 12px 14px;
+    border: 1px solid var(--rule-soft);
+    background: var(--bg);
+    margin-bottom: 8px;
+    border-radius: 2px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .trash-type-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 2px 6px;
+    border-radius: 2px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .trash-type-badge.type-column  { background: #e5ebf2; color: #1f3a5f; }
+  .trash-type-badge.type-entry   { background: #f5ebe0; color: #a65d1e; }
+  .trash-type-badge.type-comment { background: #e8efe8; color: #2d5a3d; }
+
+  .trash-item-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .trash-item-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 3px;
+    word-break: break-word;
+  }
+
+  .trash-item-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .trash-item-preview {
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-top: 6px;
+    line-height: 1.5;
+    padding: 6px 8px;
+    background: rgba(0,0,0,0.02);
+    border-left: 2px solid var(--rule);
+    border-radius: 0 2px 2px 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .trash-item-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .trash-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 4px 10px;
+    background: transparent;
+    border: 1px solid var(--rule);
+    color: var(--ink-soft);
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .trash-btn:hover {
+    background: var(--ink);
+    color: var(--bg-paper);
+    border-color: var(--ink);
+  }
+
+  .trash-btn.danger:hover {
+    background: var(--cat-hq);
+    border-color: var(--cat-hq);
+  }
+
+  /* Full View Modal */
+  .modal-overlay.full-view {
+    padding: 0;
+    align-items: stretch;
+  }
+
+  .modal.full-view-modal {
+    max-width: 960px;
+    width: 100%;
+    max-height: 100vh;
+    height: 100vh;
+    border-radius: 0;
+    border: none;
+    margin: 0 auto;
+    border-left: 1px solid var(--rule);
+    border-right: 1px solid var(--rule);
+  }
+
+  .full-view-header {
+    padding: 18px 40px;
+    border-bottom: 1px solid var(--rule);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    background: var(--bg-paper);
+  }
+
+  .full-view-breadcrumb {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .full-view-breadcrumb .crumb-sep {
+    opacity: 0.5;
+  }
+
+  .full-view-breadcrumb .crumb-col {
+    color: var(--col-accent, var(--ink-soft));
+    font-weight: 600;
+  }
+
+  .full-view-body {
+    overflow-y: auto;
+    padding: 40px 60px 80px;
+    flex: 1;
+  }
+
+  .fv-title {
+    font-family: 'Fraunces', serif;
+    font-size: 40px;
+    font-weight: 500;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    background: transparent;
+    border: none;
+    outline: none;
+    width: 100%;
+    padding: 4px 8px;
+    border-radius: 2px;
+    font-variation-settings: "opsz" 144;
+    margin: 0 -8px 8px;
+  }
+
+  .fv-title:focus {
+    background: #fffbe8;
+    box-shadow: 0 0 0 2px #fffbe8;
+  }
+
+  .fv-dates {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 36px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--rule-soft);
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .fv-section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .fv-description {
+    font-family: 'Fraunces', serif;
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--ink);
+    white-space: pre-wrap;
+    padding: 12px 16px;
+    border-radius: 2px;
+    min-height: 60px;
+    margin: 0 -16px 36px;
+    font-variation-settings: "opsz" 16;
+  }
+
+  .fv-description[contenteditable="true"] {
+    background: #fffbe8;
+    outline: none;
+  }
+
+  .fv-description:empty::before {
+    content: 'No description yet.';
+    color: var(--ink-faint);
+    font-style: italic;
+  }
+
+  .fv-description[contenteditable="true"]:empty::before {
+    content: 'Write a description…';
+  }
+
+  .fv-sub-entries {
+    margin: 0 0 36px;
+  }
+
+  .fv-sub-entry {
+    padding: 10px 14px;
+    background: var(--bg);
+    border: 1px solid var(--rule-soft);
+    border-radius: 2px;
+    margin-bottom: 6px;
+    font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .fv-sub-entry-title {
+    flex: 1;
+  }
+
+  .fv-sub-entry-title.empty {
+    color: var(--ink-faint);
+    font-style: italic;
+  }
+
+  .fv-sub-desc {
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-top: 4px;
+    line-height: 1.5;
+  }
+
+  .fv-comments {
+    margin-bottom: 24px;
+  }
+
+  .fv-comment {
+    padding: 12px 16px;
+    background: rgba(0,0,0,0.02);
+    border-left: 2px solid var(--rule);
+    margin-bottom: 10px;
+    border-radius: 0 2px 2px 0;
+  }
+
+  .fv-comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+
+  .fv-comment-date {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .fv-comment-text {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--ink);
+    white-space: pre-wrap;
+  }
+
+  .fv-comment-input-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  .fv-comment-input {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1px solid var(--rule);
+    background: var(--bg-paper);
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--ink);
+    border-radius: 2px;
+    outline: none;
+    resize: vertical;
+    min-height: 42px;
+    max-height: 200px;
+    line-height: 1.5;
+  }
+
+  .fv-comment-input:focus {
+    border-color: var(--ink-soft);
+  }
+
+  .fv-comment-submit {
+    padding: 8px 18px;
+    background: var(--ink);
+    color: var(--bg-paper);
+    border: none;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 2px;
+    align-self: flex-start;
+  }
+
+  .fv-comment-submit:hover {
+    background: var(--ink-soft);
+  }
+
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--ink);
+    color: var(--bg-paper);
+    padding: 10px 18px;
+    font-size: 12px;
+    border-radius: 2px;
+    box-shadow: var(--shadow-lg);
+    transition: transform 0.3s ease;
+    z-index: 100;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.04em;
+  }
+
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="title-block">
+      <h1>Work Dashboard</h1>
+      <div class="subtitle">A private <em>ledger</em> of ongoing work &mdash; <span id="today-date"></span></div>
+    </div>
+    <div class="header-meta">
+      <span class="save-indicator" id="save-indicator">Saved</span>
+      <div class="toolbar">
+        <button class="btn" onclick="openSyncModal()" id="sync-btn">Cloud Sync</button>
+        <button class="btn" onclick="openTrash()" id="trash-btn">Trash Bin</button>
+        <button class="btn" onclick="exportData()">Export JSON</button>
+        <button class="btn" onclick="document.getElementById('import-file').click()">Import JSON</button>
+        <input type="file" id="import-file" accept=".json" onchange="importData(event)">
+      </div>
+    </div>
+  </header>
+
+  <div class="board" id="board"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="modal-overlay" id="trash-modal" onclick="if(event.target===this) closeTrash()">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <h2>Trash Bin</h2>
+        <div class="modal-subtitle" id="trash-summary">Deleted items, newest first</div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" id="empty-bin-btn" onclick="emptyBin()">Empty Bin</button>
+        <button class="btn" onclick="closeTrash()">Close</button>
+      </div>
+    </div>
+    <div class="modal-body" id="trash-list"></div>
+  </div>
+</div>
+
+<div class="modal-overlay full-view" id="full-view-modal" onclick="if(event.target===this) closeFullView()">
+  <div class="modal full-view-modal">
+    <div class="full-view-header">
+      <div class="full-view-breadcrumb" id="full-view-breadcrumb"></div>
+      <button class="btn" onclick="closeFullView()">Close (Esc)</button>
+    </div>
+    <div class="full-view-body" id="full-view-body"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="sync-modal" onclick="if(event.target===this) closeSyncModal()">
+  <div class="modal" style="max-width:560px;">
+    <div class="modal-header">
+      <div>
+        <h2>Cloud Sync</h2>
+        <div class="modal-subtitle">GitHub Gist — keeps your data in sync across devices</div>
+      </div>
+      <button class="btn" onclick="closeSyncModal()">Close</button>
+    </div>
+    <div class="modal-body">
+      <div id="sync-status-block" style="margin-bottom:20px;"></div>
+      <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:8px;">GitHub Personal Access Token</div>
+      <input type="password" id="sync-token" placeholder="ghp_..." style="width:100%; padding:10px 12px; border:1px solid var(--rule); background:var(--bg-paper); font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--ink); border-radius:2px; outline:none; margin-bottom:16px;">
+      <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:8px;">Gist ID</div>
+      <input type="text" id="sync-gist-id" placeholder="e.g. a1b2c3d4e5f6..." style="width:100%; padding:10px 12px; border:1px solid var(--rule); background:var(--bg-paper); font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--ink); border-radius:2px; outline:none; margin-bottom:20px;">
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="saveSyncSettings()">Save &amp; Test</button>
+        <button class="btn" onclick="pullFromGist(true)">Pull from Gist</button>
+        <button class="btn" onclick="pushToGist(true)">Push to Gist</button>
+        <button class="btn" onclick="disconnectSync()" style="margin-left:auto;">Disconnect</button>
+      </div>
+      <div style="margin-top:24px; padding:14px; background:rgba(0,0,0,0.03); border-left:2px solid var(--rule); font-size:12px; line-height:1.6; color:var(--ink-soft);">
+        <div style="font-family:'Fraunces',serif; font-weight:600; margin-bottom:6px;">Setup instructions</div>
+        1. Create a GitHub account if you don't have one.<br>
+        2. Go to <span style="font-family:monospace;">github.com/settings/tokens</span> → Generate new token (classic) → check only <strong>gist</strong> scope → copy the token.<br>
+        3. Create a private gist at <span style="font-family:monospace;">gist.github.com</span> with any content (e.g. filename <span style="font-family:monospace;">dashboard.json</span>, content <span style="font-family:monospace;">{}</span>).<br>
+        4. Copy the gist ID from the URL (the long hex string).<br>
+        5. Paste both here. Token and Gist ID are saved only on this device.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ============= DATA MODEL =============
+  const DEFAULT_DATA = {
+    version: 1,
+    columns: [
+      { id: 'market', name: 'Market Trend',    color: { accent: '#2d5a3d', bg: '#e8efe8' }, entries: [] },
+      { id: 'hq',     name: 'HQ Reporting',    color: { accent: '#8b2e2e', bg: '#f2e5e5' }, entries: [] },
+      { id: 'cre',    name: 'CRE General',     color: { accent: '#1f3a5f', bg: '#e5ebf2' }, entries: [] },
+      { id: 'asset',  name: 'Asset Management',color: { accent: '#a65d1e', bg: '#f5ebe0' }, entries: [] }
+    ],
+    trash: [] // { id, type: 'column'|'entry'|'comment', data, deletedAt, context }
+  };
+
+  const STORAGE_KEY = 'work-dashboard-v1';
+  let state = loadState();
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (!parsed.trash) parsed.trash = [];
+        return parsed;
+      }
+    } catch (e) { console.warn('Load failed', e); }
+    return structuredClone(DEFAULT_DATA);
+  }
+
+  let saveTimer;
+  function saveState(opts = {}) {
+    const indicator = document.getElementById('save-indicator');
+    indicator.classList.add('saving');
+    indicator.textContent = 'Saving…';
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        indicator.classList.remove('saving');
+        indicator.textContent = 'Saved';
+        if (!opts.skipPush) schedulePush();
+      } catch (e) {
+        indicator.textContent = 'Save failed';
+        console.error(e);
+      }
+    }, 300);
+  }
+
+  // ============= UTILITIES =============
+  const uid = () => Math.random().toString(36).slice(2, 10);
+
+  function formatDate(d) {
+    const date = new Date(d);
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    const yy = String(date.getFullYear()).slice(-2);
+    const hh = String(date.getHours()).padStart(2, '0');
+    const mi = String(date.getMinutes()).padStart(2, '0');
+    return `${mm}/${dd}/${yy} ${hh}:${mi}`;
+  }
+
+  function escapeHtml(s) {
+    return (s || '').replace(/[&<>"']/g, c => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
+  }
+
+  // Escapes HTML AND converts URLs into clickable links.
+  // Use this for rendering user-entered text in read-only display contexts.
+  // Matches http(s)://, www., and bare domain.tld/path patterns.
+  function linkifyHtml(s) {
+    if (!s) return '';
+    const escaped = escapeHtml(s);
+    // Match URLs with protocol, or starting with www., or common TLD patterns.
+    // Trailing punctuation is trimmed from the match so a sentence-ending
+    // period/comma doesn't get sucked into the link.
+    const urlRe = /(\bhttps?:\/\/[^\s<]+|\bwww\.[^\s<]+|\b[a-zA-Z0-9][-a-zA-Z0-9.]*\.(?:com|org|net|io|co|dev|app|ai|gov|edu|me|us|uk|jp|kr|cn|eu)(?:\/[^\s<]*)?)/gi;
+    return escaped.replace(urlRe, (match) => {
+      // Strip common trailing punctuation
+      let trailing = '';
+      const trailRe = /[.,;:!?)\]}>'"]+$/;
+      const trail = match.match(trailRe);
+      if (trail) {
+        trailing = trail[0];
+        match = match.slice(0, -trailing.length);
+      }
+      // Build href — add https:// if missing protocol
+      const href = /^https?:\/\//i.test(match) ? match : 'https://' + match;
+      return `<a href="${href}" target="_blank" rel="noopener noreferrer" class="inline-link">${match}</a>${trailing}`;
+    });
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  // Color palette used when adding new columns (cycled)
+  const COLOR_PALETTE = [
+    { accent: '#2d5a3d', bg: '#e8efe8' }, // green
+    { accent: '#8b2e2e', bg: '#f2e5e5' }, // burgundy
+    { accent: '#1f3a5f', bg: '#e5ebf2' }, // navy
+    { accent: '#a65d1e', bg: '#f5ebe0' }, // amber
+    { accent: '#5a3d7a', bg: '#ece5f2' }, // purple
+    { accent: '#3d5a5a', bg: '#e0ebeb' }, // teal
+    { accent: '#7a5a2d', bg: '#f0e8d8' }, // olive
+    { accent: '#7a2d5a', bg: '#f2e0ea' }  // magenta
+  ];
+
+  function ensureColors() {
+    // Back-fill colors for any column missing them (migration for old data)
+    state.columns.forEach((col, i) => {
+      if (!col.color) {
+        col.color = COLOR_PALETTE[i % COLOR_PALETTE.length];
+      }
+    });
+  }
+
+  // ============= RENDER =============
+  function render() {
+    ensureColors();
+    const board = document.getElementById('board');
+    board.innerHTML = '';
+    state.columns.forEach(col => board.appendChild(renderColumn(col)));
+
+    // Add Column button at the end
+    const addCol = document.createElement('button');
+    addCol.className = 'add-column';
+    addCol.textContent = '+ Add Column';
+    addCol.onclick = addColumn;
+    board.appendChild(addCol);
+
+    // Adjust grid template to fit column count (+1 for add-column slot)
+    const colCount = state.columns.length + 1;
+    board.style.gridTemplateColumns = `repeat(${Math.min(colCount, 5)}, minmax(280px, 1fr))`;
+
+    document.getElementById('today-date').textContent =
+      new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
+
+    // Update trash button count
+    const trashBtn = document.getElementById('trash-btn');
+    if (trashBtn) {
+      const n = (state.trash || []).length;
+      trashBtn.textContent = n > 0 ? `Trash Bin (${n})` : 'Trash Bin';
+    }
+  }
+
+  function renderColumn(col) {
+    const el = document.createElement('div');
+    el.className = 'column';
+    el.dataset.colId = col.id;
+    el.style.setProperty('--col-accent', col.color.accent);
+    el.style.setProperty('--col-bg', col.color.bg);
+
+    const isEditingName = col._editingName;
+
+    el.innerHTML = `
+      <div class="column-header">
+        <span class="col-drag-handle" title="Drag to reorder column">⋮⋮</span>
+        <div class="column-title">
+          <input class="column-name ${isEditingName ? 'editing' : ''}"
+                 value="${escapeHtml(col.name)}"
+                 placeholder="Category"
+                 ${isEditingName ? '' : 'readonly'}>
+          <span class="column-count">${countEntries(col.entries)}</span>
+        </div>
+        <div class="column-actions">
+          <button class="column-btn" data-action="edit-col" title="${isEditingName ? 'Done' : 'Rename column'}">${isEditingName ? '✓' : '✎'}</button>
+          <button class="column-btn big" data-action="add-entry" title="Add entry">+</button>
+          <button class="column-btn delete" data-action="delete-col" title="Delete column">✕</button>
+        </div>
+      </div>
+      <div class="entries" data-col-id="${col.id}"></div>
+    `;
+
+    const nameInput = el.querySelector('.column-name');
+    const editBtn = el.querySelector('[data-action="edit-col"]');
+    const addBtn = el.querySelector('[data-action="add-entry"]');
+    const delBtn = el.querySelector('[data-action="delete-col"]');
+
+    editBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleColumnEdit(col.id);
+    });
+    addBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      addEntry(col.id);
+    });
+    delBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      deleteColumn(col.id);
+    });
+
+    if (isEditingName) {
+      setTimeout(() => { nameInput.focus(); nameInput.select(); }, 0);
+      const commit = () => {
+        const newVal = nameInput.value.trim() || 'Untitled';
+        if (newVal !== col.name) col.name = newVal;
+        delete col._editingName;
+        saveState();
+        render();
+      };
+      nameInput.addEventListener('blur', commit);
+      nameInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); nameInput.blur(); }
+        if (e.key === 'Escape') {
+          nameInput.value = col.name;
+          delete col._editingName;
+          render();
+        }
+      });
+    }
+
+    const entriesEl = el.querySelector('.entries');
+    col.entries.forEach(entry => entriesEl.appendChild(renderEntry(entry, col.id)));
+
+    attachColumnDnD(el);
+    attachColumnReorderDnD(el, col.id);
+    return el;
+  }
+
+  // Column-level reordering — only the drag handle is draggable
+  function attachColumnReorderDnD(columnEl, colId) {
+    const handle = columnEl.querySelector('.col-drag-handle');
+    if (handle) {
+      handle.draggable = true;
+
+      handle.addEventListener('dragstart', (e) => {
+        e.stopPropagation();
+        colDragData = { colId };
+        dragData = null;
+        columnEl.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', 'col:' + colId);
+      });
+
+      handle.addEventListener('dragend', () => {
+        columnEl.classList.remove('dragging');
+        document.querySelectorAll('.column.drop-before, .column.drop-after')
+          .forEach(n => n.classList.remove('drop-before', 'drop-after'));
+        colDragData = null;
+      });
+    }
+
+    // The column itself only listens for dragover/drop (not dragstart)
+    columnEl.addEventListener('dragover', (e) => {
+      if (!colDragData || colDragData.colId === colId) return;
+      if (dragData) return;
+      e.preventDefault();
+      const rect = columnEl.getBoundingClientRect();
+      const before = (e.clientX - rect.left) < rect.width / 2;
+      columnEl.classList.toggle('drop-before', before);
+      columnEl.classList.toggle('drop-after', !before);
+    });
+
+    columnEl.addEventListener('dragleave', (e) => {
+      // Only clear when actually leaving the column (not moving to a child)
+      if (!columnEl.contains(e.relatedTarget)) {
+        columnEl.classList.remove('drop-before', 'drop-after');
+      }
+    });
+
+    columnEl.addEventListener('drop', (e) => {
+      if (!colDragData || colDragData.colId === colId) return;
+      if (dragData) return;
+      e.preventDefault();
+      const before = columnEl.classList.contains('drop-before');
+      columnEl.classList.remove('drop-before', 'drop-after');
+      moveColumn(colDragData.colId, colId, before ? 'before' : 'after');
+    });
+  }
+
+  function moveColumn(srcId, targetId, pos) {
+    if (srcId === targetId) return;
+    const srcIdx = state.columns.findIndex(c => c.id === srcId);
+    if (srcIdx < 0) return;
+    const [moved] = state.columns.splice(srcIdx, 1);
+    const tgtIdx = state.columns.findIndex(c => c.id === targetId);
+    if (tgtIdx < 0) {
+      state.columns.splice(srcIdx, 0, moved);
+      return;
+    }
+    const insertAt = pos === 'before' ? tgtIdx : tgtIdx + 1;
+    state.columns.splice(insertAt, 0, moved);
+    saveState();
+    render();
+  }
+
+  function countEntries(entries) {
+    let n = entries.length;
+    entries.forEach(e => { if (e.children) n += countEntries(e.children); });
+    return n;
+  }
+
+  function renderEntry(entry, colId, depth = 0) {
+    const el = document.createElement('div');
+    el.className = 'entry' + (entry.expanded ? ' expanded' : '');
+    el.dataset.entryId = entry.id;
+    el.dataset.colId = colId;
+    // Entry itself is NOT draggable — only the drag handle is.
+    // This prevents click events (like delete X) from being hijacked by drag start.
+
+    const hasChildren = entry.children && entry.children.length > 0;
+    const commentCount = (entry.comments || []).length;
+    const isEditingTitle = entry._editingTitle;
+    // Auto-edit mode for brand-new empty entries
+    const isNewEmpty = !entry.title && !entry.createdAt;
+
+    el.innerHTML = `
+      <div class="entry-row">
+        <span class="drag-handle" title="Drag to reorder">⋮⋮</span>
+        <button class="entry-toggle" title="Expand">▶</button>
+        <input class="entry-title ${isEditingTitle || isNewEmpty ? 'editing' : ''}"
+               value="${escapeHtml(entry.title)}"
+               placeholder="Untitled"
+               ${isEditingTitle || isNewEmpty ? '' : 'readonly'}>
+        <div class="entry-meta">
+          ${commentCount ? `<span class="comment-count" title="${commentCount} comment${commentCount>1?'s':''}">💬 ${commentCount}</span>` : ''}
+          <button class="entry-icon" title="${isEditingTitle ? 'Done editing' : 'Edit title'}" data-action="edit-title">${isEditingTitle ? '✓' : '✎'}</button>
+          <button class="entry-icon" title="Open full view" data-action="expand-full">⤢</button>
+          <button class="entry-icon" title="Add sub-entry" data-action="add-sub">+</button>
+          <button class="entry-icon delete" title="Delete" data-action="delete">✕</button>
+        </div>
+      </div>
+      <div class="entry-body"></div>
+    `;
+
+    const toggle = el.querySelector('.entry-toggle');
+    const titleInput = el.querySelector('.entry-title');
+    const row = el.querySelector('.entry-row');
+    const body = el.querySelector('.entry-body');
+
+    // Attach button listeners directly to buttons in THIS entry's row only.
+    // Using row.querySelector instead of el.querySelector ensures we never
+    // accidentally match buttons inside nested child entries.
+    const entryMeta = row.querySelector('.entry-meta');
+    const editBtn  = entryMeta.querySelector('[data-action="edit-title"]');
+    const expandBtn = entryMeta.querySelector('[data-action="expand-full"]');
+    const addSubBtn = entryMeta.querySelector('[data-action="add-sub"]');
+    const deleteBtn = entryMeta.querySelector('[data-action="delete"]');
+
+    const bindBtn = (btn, handler) => {
+      if (!btn) return;
+      btn.addEventListener('click', (ev) => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        ev.stopImmediatePropagation();
+        handler();
+      });
+      btn.addEventListener('mousedown', (ev) => ev.stopPropagation());
+    };
+
+    bindBtn(editBtn,   () => toggleTitleEdit(entry.id));
+    bindBtn(expandBtn, () => openFullView(entry.id));
+    bindBtn(addSubBtn, () => addSubEntry(entry.id));
+    bindBtn(deleteBtn, () => deleteEntry(entry.id));
+
+    // Expand arrow
+    toggle.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      ev.stopImmediatePropagation();
+      toggleEntry(entry.id);
+    });
+
+    // Clicking empty row space (not on a button/input) toggles expand.
+    // We check strictly that the click target is this row itself or a direct
+    // child that isn't interactive.
+    row.addEventListener('click', (ev) => {
+      // If click came from a nested entry's row (inside body), ignore it
+      const nearestEntry = ev.target.closest('.entry');
+      if (nearestEntry !== el) return;
+      if (ev.target.closest('button, input, textarea, [contenteditable="true"], .drag-handle')) return;
+      toggleEntry(entry.id);
+    });
+
+    // Title editing — only active when not readonly
+    if (isEditingTitle || isNewEmpty) {
+      // Focus and select after render
+      setTimeout(() => {
+        titleInput.focus();
+        if (entry.title) titleInput.select();
+      }, 0);
+
+      const commit = () => {
+        const newVal = titleInput.value.trim();
+        if (newVal !== entry.title) {
+          entry.title = newVal;
+          entry.titleEditedAt = new Date().toISOString();
+        }
+        if (!entry.createdAt) entry.createdAt = new Date().toISOString();
+        delete entry._editingTitle;
+        saveState();
+        render();
+      };
+      titleInput.addEventListener('blur', commit);
+      titleInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); titleInput.blur(); }
+        if (e.key === 'Escape') {
+          titleInput.value = entry.title;
+          delete entry._editingTitle;
+          render();
+        }
+      });
+    }
+
+    // Body content (description + dates + children + comments)
+    if (entry.expanded) {
+      // Dates row — shows Created by default, toggles to Edited on click
+      if (entry.createdAt) {
+        const hasEdited = entry.titleEditedAt && entry.titleEditedAt !== entry.createdAt;
+        const showingEdited = entry._showEdited && hasEdited;
+
+        const dates = document.createElement('div');
+        dates.className = 'entry-dates';
+        const label = showingEdited ? 'Edited' : 'Created';
+        const ts = showingEdited ? entry.titleEditedAt : entry.createdAt;
+        const tooltip = hasEdited
+          ? (showingEdited ? 'Click to see created date' : 'Click to see last edited date')
+          : '';
+        dates.innerHTML = `
+          <span class="date-toggle${hasEdited ? ' clickable' : ''}"
+                ${tooltip ? `title="${tooltip}"` : ''}>
+            ${label} ${formatDate(ts)}
+          </span>
+        `;
+        if (hasEdited) {
+          dates.querySelector('.date-toggle').addEventListener('click', (e) => {
+            e.stopPropagation();
+            entry._showEdited = !entry._showEdited;
+            render();
+          });
+        }
+        body.appendChild(dates);
+      }
+
+      // Description block with edit toggle
+      const isEditingDesc = entry._editingDesc;
+      const desc = document.createElement('div');
+      desc.className = 'description';
+      desc.innerHTML = `
+        <div class="description-header">
+          <span class="description-date">
+            Description${entry.descriptionEditedAt ? ' · edited ' + formatDate(entry.descriptionEditedAt) : ''}
+          </span>
+          <button class="edit-action ${isEditingDesc ? 'active' : ''}" data-desc-action="toggle" title="${isEditingDesc ? 'Done editing' : 'Edit description'}">
+            ${isEditingDesc ? '✓' : '✎'}
+          </button>
+        </div>
+        <div class="description-text"
+             contenteditable="${isEditingDesc ? 'true' : 'false'}">${isEditingDesc ? escapeHtml(entry.description || '') : linkifyHtml(entry.description || '')}</div>
+      `;
+      const descText = desc.querySelector('.description-text');
+      const descToggle = desc.querySelector('[data-desc-action="toggle"]');
+
+      descToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (isEditingDesc) {
+          // Commit
+          const newVal = descText.innerText.trim();
+          if (newVal !== (entry.description || '')) {
+            entry.description = newVal;
+            entry.descriptionEditedAt = new Date().toISOString();
+          }
+          delete entry._editingDesc;
+          saveState();
+          render();
+        } else {
+          entry._editingDesc = true;
+          render();
+          setTimeout(() => {
+            const newDescText = document.querySelector(`[data-entry-id="${entry.id}"] .description-text`);
+            newDescText?.focus();
+          }, 0);
+        }
+      });
+
+      // Commit on blur too
+      if (isEditingDesc) {
+        descText.addEventListener('blur', (e) => {
+          // Don't commit if clicking the Done button (it handles commit itself)
+          if (e.relatedTarget === descToggle) return;
+          const newVal = descText.innerText.trim();
+          if (newVal !== (entry.description || '')) {
+            entry.description = newVal;
+            entry.descriptionEditedAt = new Date().toISOString();
+          }
+          delete entry._editingDesc;
+          saveState();
+          render();
+        });
+      }
+
+      body.appendChild(desc);
+
+      // Sub-entries
+      if (hasChildren) {
+        const subList = document.createElement('div');
+        subList.className = 'entries sub-entries';
+        subList.style.marginTop = '6px';
+        subList.dataset.colId = colId;
+        subList.dataset.parentId = entry.id;
+        entry.children.forEach(child => subList.appendChild(renderEntry(child, colId, depth + 1)));
+        body.appendChild(subList);
+      }
+
+      // Comments
+      const commentsWrap = document.createElement('div');
+      commentsWrap.className = 'comments';
+      commentsWrap.innerHTML = '<div class="description-date" style="margin-top:10px">Comments</div>';
+
+      (entry.comments || []).forEach(c => {
+        const cEl = document.createElement('div');
+        cEl.className = 'comment';
+        cEl.innerHTML = `
+          <div class="comment-header">
+            <span class="comment-date">${formatDate(c.createdAt)}</span>
+            <button class="comment-delete" onclick="deleteComment('${entry.id}','${c.id}')" title="Delete comment">✕</button>
+          </div>
+          <div class="comment-text">${linkifyHtml(c.text)}</div>
+        `;
+        commentsWrap.appendChild(cEl);
+      });
+
+      const inputRow = document.createElement('div');
+      inputRow.className = 'comment-input-row';
+      inputRow.innerHTML = `
+        <textarea class="comment-input" placeholder="Write a comment…" rows="1"></textarea>
+        <button class="comment-submit">Post</button>
+      `;
+      const inputEl = inputRow.querySelector('.comment-input');
+      const submitEl = inputRow.querySelector('.comment-submit');
+      const submit = () => {
+        const text = inputEl.value.trim();
+        if (!text) return;
+        addComment(entry.id, text);
+      };
+      submitEl.onclick = submit;
+      inputEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); submit(); }
+      });
+      commentsWrap.appendChild(inputRow);
+      body.appendChild(commentsWrap);
+    }
+
+    attachEntryDnD(el);
+    return el;
+  }
+
+  function toggleTitleEdit(entryId) {
+    const r = findEntry(entryId);
+    if (!r) return;
+    if (r.entry._editingTitle) {
+      delete r.entry._editingTitle;
+    } else {
+      r.entry._editingTitle = true;
+    }
+    render();
+  }
+
+  // ============= COLUMN MUTATIONS =============
+  function addColumn() {
+    const newId = 'col_' + uid();
+    const colorIndex = state.columns.length % COLOR_PALETTE.length;
+    state.columns.push({
+      id: newId,
+      name: 'New Category',
+      color: COLOR_PALETTE[colorIndex],
+      entries: [],
+      _editingName: true
+    });
+    saveState();
+    render();
+  }
+
+  function toggleColumnEdit(colId) {
+    const col = state.columns.find(c => c.id === colId);
+    if (!col) return;
+    if (col._editingName) delete col._editingName;
+    else col._editingName = true;
+    render();
+  }
+
+  function deleteColumn(colId) {
+    const col = state.columns.find(c => c.id === colId);
+    if (!col) return;
+    const hasEntries = col.entries && col.entries.length > 0;
+    const msg = hasEntries
+      ? `Delete "${col.name}" and all ${countEntries(col.entries)} entries? It will be moved to the Trash Bin.`
+      : `Delete "${col.name}"?`;
+    if (!confirm(msg)) return;
+
+    const removed = structuredClone(col);
+    delete removed._editingName;
+    removed.entries.forEach(stripFlags);
+
+    state.columns = state.columns.filter(c => c.id !== colId);
+    state.trash.push({
+      id: uid(),
+      type: 'column',
+      data: removed,
+      deletedAt: new Date().toISOString(),
+      context: {}
+    });
+    saveState();
+    render();
+  }
+
+  // ============= STATE MUTATIONS =============
+  function findEntry(entryId, entries = null, parent = null) {
+    if (!entries) {
+      for (const col of state.columns) {
+        const r = findEntry(entryId, col.entries, { col });
+        if (r) return r;
+      }
+      return null;
+    }
+    for (let i = 0; i < entries.length; i++) {
+      const e = entries[i];
+      if (e.id === entryId) return { entry: e, arr: entries, index: i, ...parent };
+      if (e.children) {
+        const r = findEntry(entryId, e.children, { ...parent, parentEntry: e });
+        if (r) return r;
+      }
+    }
+    return null;
+  }
+
+  function addEntry(colId) {
+    const col = state.columns.find(c => c.id === colId);
+    if (!col) return;
+    const now = new Date().toISOString();
+    col.entries.push({
+      id: uid(), title: '', description: '', expanded: true,
+      comments: [], children: [], createdAt: now, _editingTitle: true
+    });
+    saveState(); render();
+  }
+
+  function addSubEntry(parentId) {
+    const r = findEntry(parentId);
+    if (!r) return;
+    r.entry.children = r.entry.children || [];
+    const now = new Date().toISOString();
+    r.entry.children.push({
+      id: uid(), title: '', description: '', expanded: true,
+      comments: [], children: [], createdAt: now, _editingTitle: true
+    });
+    r.entry.expanded = true;
+    saveState(); render();
+  }
+
+  function deleteEntry(entryId) {
+    const r = findEntry(entryId);
+    if (!r) return;
+    const label = r.entry.title || '(untitled card)';
+    if (!confirm(`Delete "${label}"? It will be moved to the Trash Bin.`)) return;
+
+    // Re-find after the confirm (in case state changed, though unlikely)
+    const r2 = findEntry(entryId);
+    if (!r2) return;
+
+    // Find the column this entry belongs to (walk up if nested)
+    const colId = findColumnForEntry(entryId);
+    const colName = state.columns.find(c => c.id === colId)?.name || 'Unknown';
+
+    const [removed] = r2.arr.splice(r2.index, 1);
+    stripFlags(removed);
+    state.trash.push({
+      id: uid(),
+      type: 'entry',
+      data: removed,
+      deletedAt: new Date().toISOString(),
+      context: { columnId: colId, columnName: colName }
+    });
+    saveState();
+    render();
+  }
+
+  function findColumnForEntry(entryId) {
+    // Walks every column to find which one contains the entry (or its ancestor)
+    for (const col of state.columns) {
+      if (entryContains(col.entries, entryId)) return col.id;
+    }
+    return null;
+  }
+
+  function entryContains(entries, entryId) {
+    for (const e of entries) {
+      if (e.id === entryId) return true;
+      if (e.children && entryContains(e.children, entryId)) return true;
+    }
+    return false;
+  }
+
+  function stripFlags(obj) {
+    Object.keys(obj).forEach(k => { if (k.startsWith('_')) delete obj[k]; });
+    if (obj.children) obj.children.forEach(stripFlags);
+  }
+
+  function toggleEntry(entryId) {
+    const r = findEntry(entryId);
+    if (!r) return;
+    r.entry.expanded = !r.entry.expanded;
+    saveState(); render();
+  }
+
+  function addComment(entryId, text) {
+    const r = findEntry(entryId);
+    if (!r) return;
+    r.entry.comments = r.entry.comments || [];
+    r.entry.comments.push({ id: uid(), text, createdAt: new Date().toISOString() });
+    saveState(); render();
+  }
+
+  function deleteComment(entryId, commentId) {
+    const r = findEntry(entryId);
+    if (!r) return;
+    const comments = r.entry.comments || [];
+    const cIdx = comments.findIndex(c => c.id === commentId);
+    if (cIdx < 0) return;
+    const [removed] = comments.splice(cIdx, 1);
+
+    const colId = findColumnForEntry(entryId);
+    const col = state.columns.find(c => c.id === colId);
+    state.trash.push({
+      id: uid(),
+      type: 'comment',
+      data: removed,
+      deletedAt: new Date().toISOString(),
+      context: {
+        entryId: entryId,
+        entryTitle: r.entry.title || '(untitled card)',
+        columnId: colId,
+        columnName: col?.name || 'Unknown'
+      }
+    });
+    saveState(); render();
+  }
+
+  // ============= DRAG & DROP =============
+  let dragData = null;
+  let colDragData = null;
+
+  function attachEntryDnD(el) {
+    // Drag starts from the handle only (not from the entry body), so clicks on
+    // buttons like ✕ are never misinterpreted as drag gestures.
+    const handle = el.querySelector('.drag-handle');
+    if (handle) {
+      handle.draggable = true;
+      handle.addEventListener('dragstart', (e) => {
+        e.stopPropagation();
+        dragData = { entryId: el.dataset.entryId };
+        colDragData = null;
+        el.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', el.dataset.entryId);
+      });
+      handle.addEventListener('dragend', () => {
+        el.classList.remove('dragging');
+        document.querySelectorAll('.drop-before, .drop-after').forEach(n => n.classList.remove('drop-before', 'drop-after'));
+        dragData = null;
+      });
+    }
+
+    // Entry itself only accepts drops
+    el.addEventListener('dragover', (e) => {
+      if (!dragData || dragData.entryId === el.dataset.entryId) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const rect = el.getBoundingClientRect();
+      const before = (e.clientY - rect.top) < rect.height / 2;
+      el.classList.toggle('drop-before', before);
+      el.classList.toggle('drop-after', !before);
+    });
+    el.addEventListener('dragleave', (e) => {
+      if (!el.contains(e.relatedTarget)) {
+        el.classList.remove('drop-before', 'drop-after');
+      }
+    });
+    el.addEventListener('drop', (e) => {
+      if (!dragData) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const before = el.classList.contains('drop-before');
+      el.classList.remove('drop-before', 'drop-after');
+      moveEntry(dragData.entryId, el.dataset.entryId, before ? 'before' : 'after');
+    });
+  }
+
+  function attachColumnDnD(columnEl) {
+    const entriesEl = columnEl.querySelector('.entries');
+    entriesEl.addEventListener('dragover', (e) => {
+      if (!dragData) return;
+      e.preventDefault();
+      // Only highlight if over empty area
+      if (e.target === entriesEl) {
+        entriesEl.classList.add('drag-over');
+      }
+    });
+    entriesEl.addEventListener('dragleave', (e) => {
+      if (e.target === entriesEl) entriesEl.classList.remove('drag-over');
+    });
+    entriesEl.addEventListener('drop', (e) => {
+      if (!dragData) return;
+      if (e.target === entriesEl) {
+        e.preventDefault();
+        entriesEl.classList.remove('drag-over');
+        moveEntryToColumn(dragData.entryId, entriesEl.dataset.colId);
+      }
+    });
+  }
+
+  function moveEntry(srcId, targetId, pos) {
+    if (srcId === targetId) return;
+    const src = findEntry(srcId);
+    const tgt = findEntry(targetId);
+    if (!src || !tgt) return;
+    // Prevent dropping into own descendant
+    if (isDescendant(src.entry, targetId)) return;
+
+    const [moved] = src.arr.splice(src.index, 1);
+    // Re-find target (indices may have shifted)
+    const tgt2 = findEntry(targetId);
+    if (!tgt2) { src.arr.splice(src.index, 0, moved); return; }
+    const insertAt = pos === 'before' ? tgt2.index : tgt2.index + 1;
+    tgt2.arr.splice(insertAt, 0, moved);
+    saveState(); render();
+  }
+
+  function moveEntryToColumn(srcId, colId) {
+    const src = findEntry(srcId);
+    const col = state.columns.find(c => c.id === colId);
+    if (!src || !col) return;
+    const [moved] = src.arr.splice(src.index, 1);
+    col.entries.push(moved);
+    saveState(); render();
+  }
+
+  function isDescendant(entry, targetId) {
+    if (!entry.children) return false;
+    for (const c of entry.children) {
+      if (c.id === targetId) return true;
+      if (isDescendant(c, targetId)) return true;
+    }
+    return false;
+  }
+
+  // ============= FULL VIEW =============
+  let fullViewEntryId = null;
+
+  function openFullView(entryId) {
+    fullViewEntryId = entryId;
+    renderFullView();
+    document.getElementById('full-view-modal').classList.add('open');
+  }
+
+  function closeFullView() {
+    fullViewEntryId = null;
+    document.getElementById('full-view-modal').classList.remove('open');
+  }
+
+  function renderFullView() {
+    if (!fullViewEntryId) return;
+    const r = findEntry(fullViewEntryId);
+    if (!r) { closeFullView(); return; }
+
+    const entry = r.entry;
+    const colId = findColumnForEntry(fullViewEntryId);
+    const col = state.columns.find(c => c.id === colId);
+
+    const breadcrumb = document.getElementById('full-view-breadcrumb');
+    breadcrumb.innerHTML = `
+      <span class="crumb-col">${escapeHtml(col?.name || '—')}</span>
+      <span class="crumb-sep">›</span>
+      <span>${escapeHtml(entry.title || '(untitled)')}</span>
+    `;
+    breadcrumb.style.setProperty('--col-accent', col?.color?.accent || 'var(--ink)');
+
+    const body = document.getElementById('full-view-body');
+    body.innerHTML = '';
+
+    // Title (always editable in full view)
+    const titleInput = document.createElement('input');
+    titleInput.className = 'fv-title';
+    titleInput.value = entry.title;
+    titleInput.placeholder = 'Untitled';
+    titleInput.addEventListener('blur', () => {
+      const newVal = titleInput.value.trim();
+      if (newVal !== entry.title) {
+        entry.title = newVal;
+        entry.titleEditedAt = new Date().toISOString();
+        saveState();
+        render();
+        renderFullView();
+      }
+    });
+    titleInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); titleInput.blur(); }
+    });
+    body.appendChild(titleInput);
+
+    // Dates
+    if (entry.createdAt) {
+      const dates = document.createElement('div');
+      dates.className = 'fv-dates';
+      const parts = [`<span>Created ${formatDate(entry.createdAt)}</span>`];
+      if (entry.titleEditedAt && entry.titleEditedAt !== entry.createdAt) {
+        parts.push(`<span>Edited ${formatDate(entry.titleEditedAt)}</span>`);
+      }
+      if (entry.descriptionEditedAt) {
+        parts.push(`<span>Description edited ${formatDate(entry.descriptionEditedAt)}</span>`);
+      }
+      dates.innerHTML = parts.join('');
+      body.appendChild(dates);
+    }
+
+    // Description — always editable inline in full view
+    const descLabel = document.createElement('div');
+    descLabel.className = 'fv-section-label';
+    descLabel.innerHTML = `
+      <span>Description</span>
+      <button class="edit-action" id="fv-desc-toggle" title="Edit description">✎</button>
+    `;
+    body.appendChild(descLabel);
+
+    const descBox = document.createElement('div');
+    descBox.className = 'fv-description';
+    descBox.contentEditable = 'false';
+    // Read-only: show clickable links
+    descBox.innerHTML = linkifyHtml(entry.description || '');
+    body.appendChild(descBox);
+
+    const descToggleBtn = descLabel.querySelector('#fv-desc-toggle');
+    descToggleBtn.addEventListener('click', () => {
+      const editing = descBox.contentEditable === 'true';
+      if (editing) {
+        const newVal = descBox.innerText.trim();
+        if (newVal !== (entry.description || '')) {
+          entry.description = newVal;
+          entry.descriptionEditedAt = new Date().toISOString();
+          saveState();
+          render();
+        }
+        descBox.contentEditable = 'false';
+        // Re-render links in read mode
+        descBox.innerHTML = linkifyHtml(entry.description || '');
+        descToggleBtn.textContent = '✎';
+        descToggleBtn.classList.remove('active');
+        renderFullView();
+      } else {
+        // Switch to plain text for editing so URLs are editable as text
+        descBox.textContent = entry.description || '';
+        descBox.contentEditable = 'true';
+        descToggleBtn.textContent = '✓';
+        descToggleBtn.classList.add('active');
+        descBox.focus();
+      }
+    });
+    descBox.addEventListener('blur', (e) => {
+      if (e.relatedTarget === descToggleBtn) return;
+      if (descBox.contentEditable === 'true') {
+        const newVal = descBox.innerText.trim();
+        if (newVal !== (entry.description || '')) {
+          entry.description = newVal;
+          entry.descriptionEditedAt = new Date().toISOString();
+          saveState();
+          render();
+        }
+        descBox.contentEditable = 'false';
+        descToggleBtn.textContent = '✎';
+        descToggleBtn.classList.remove('active');
+        renderFullView();
+      }
+    });
+
+    // Sub-entries (read-only summary in full view)
+    if (entry.children && entry.children.length > 0) {
+      const subLabel = document.createElement('div');
+      subLabel.className = 'fv-section-label';
+      subLabel.innerHTML = `<span>Sub-entries (${entry.children.length})</span>`;
+      body.appendChild(subLabel);
+
+      const subList = document.createElement('div');
+      subList.className = 'fv-sub-entries';
+      entry.children.forEach(child => {
+        const sub = document.createElement('div');
+        sub.className = 'fv-sub-entry';
+        sub.innerHTML = `
+          <div style="flex:1; min-width:0;">
+            <div class="fv-sub-entry-title ${!child.title ? 'empty' : ''}">${escapeHtml(child.title || '(untitled)')}</div>
+            ${child.description ? `<div class="fv-sub-desc">${escapeHtml(child.description.slice(0, 200))}${child.description.length > 200 ? '…' : ''}</div>` : ''}
+          </div>
+          <button class="trash-btn" data-sub-id="${child.id}">Open</button>
+        `;
+        sub.querySelector('[data-sub-id]').addEventListener('click', () => {
+          openFullView(child.id);
+        });
+        subList.appendChild(sub);
+      });
+      body.appendChild(subList);
+    }
+
+    // Comments
+    const commentsLabel = document.createElement('div');
+    commentsLabel.className = 'fv-section-label';
+    const cCount = (entry.comments || []).length;
+    commentsLabel.innerHTML = `<span>Comments${cCount ? ` (${cCount})` : ''}</span>`;
+    body.appendChild(commentsLabel);
+
+    const commentsWrap = document.createElement('div');
+    commentsWrap.className = 'fv-comments';
+
+    (entry.comments || []).forEach(c => {
+      const cEl = document.createElement('div');
+      cEl.className = 'fv-comment';
+      cEl.innerHTML = `
+        <div class="fv-comment-header">
+          <span class="fv-comment-date">${formatDate(c.createdAt)}</span>
+          <button class="comment-delete" data-cid="${c.id}" title="Delete comment">✕</button>
+        </div>
+        <div class="fv-comment-text">${linkifyHtml(c.text)}</div>
+      `;
+      cEl.querySelector('[data-cid]').addEventListener('click', () => {
+        deleteComment(entry.id, c.id);
+        renderFullView();
+      });
+      commentsWrap.appendChild(cEl);
+    });
+
+    const inputRow = document.createElement('div');
+    inputRow.className = 'fv-comment-input-row';
+    inputRow.innerHTML = `
+      <textarea class="fv-comment-input" placeholder="Write a comment…" rows="1"></textarea>
+      <button class="fv-comment-submit">Post</button>
+    `;
+    const inputEl = inputRow.querySelector('.fv-comment-input');
+    const submitEl = inputRow.querySelector('.fv-comment-submit');
+    const submit = () => {
+      const text = inputEl.value.trim();
+      if (!text) return;
+      addComment(entry.id, text);
+      renderFullView();
+    };
+    submitEl.onclick = submit;
+    inputEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); submit(); }
+    });
+    commentsWrap.appendChild(inputRow);
+    body.appendChild(commentsWrap);
+  }
+
+  // ============= TRASH BIN =============
+  function openTrash() {
+    renderTrash();
+    document.getElementById('trash-modal').classList.add('open');
+  }
+
+  function closeTrash() {
+    document.getElementById('trash-modal').classList.remove('open');
+  }
+
+  function renderTrash() {
+    const list = document.getElementById('trash-list');
+    const summary = document.getElementById('trash-summary');
+    const emptyBtn = document.getElementById('empty-bin-btn');
+
+    if (!state.trash || state.trash.length === 0) {
+      list.innerHTML = '<div class="trash-empty">The bin is empty.</div>';
+      summary.textContent = 'Deleted items, newest first';
+      emptyBtn.style.display = 'none';
+      return;
+    }
+
+    emptyBtn.style.display = '';
+
+    // Sort by deletedAt descending
+    const sorted = [...state.trash].sort((a, b) =>
+      new Date(b.deletedAt) - new Date(a.deletedAt)
+    );
+
+    summary.textContent = `${sorted.length} item${sorted.length > 1 ? 's' : ''}, newest first`;
+
+    list.innerHTML = '';
+    sorted.forEach(item => list.appendChild(renderTrashItem(item)));
+  }
+
+  function renderTrashItem(item) {
+    const el = document.createElement('div');
+    el.className = 'trash-item';
+
+    let title = '';
+    let preview = '';
+    let meta = '';
+
+    if (item.type === 'column') {
+      title = item.data.name || '(untitled column)';
+      const entryCount = countEntries(item.data.entries || []);
+      meta = `Column · ${entryCount} ${entryCount === 1 ? 'entry' : 'entries'}`;
+    } else if (item.type === 'entry') {
+      title = item.data.title || '(untitled card)';
+      meta = `Card · from "${item.context.columnName}"`;
+      if (item.data.description) {
+        const desc = item.data.description.slice(0, 200);
+        preview = desc + (item.data.description.length > 200 ? '…' : '');
+      }
+    } else if (item.type === 'comment') {
+      title = `Comment on "${item.context.entryTitle}"`;
+      meta = `Comment · in "${item.context.columnName}"`;
+      const txt = item.data.text || '';
+      preview = txt.slice(0, 300) + (txt.length > 300 ? '…' : '');
+    }
+
+    el.innerHTML = `
+      <span class="trash-type-badge type-${item.type}">${item.type}</span>
+      <div class="trash-item-content">
+        <div class="trash-item-title">${escapeHtml(title)}</div>
+        <div class="trash-item-meta">${escapeHtml(meta)} · Deleted ${formatDate(item.deletedAt)}</div>
+        ${preview ? `<div class="trash-item-preview">${escapeHtml(preview)}</div>` : ''}
+      </div>
+      <div class="trash-item-actions">
+        <button class="trash-btn" data-act="restore">Restore</button>
+        <button class="trash-btn danger" data-act="delete">Delete</button>
+      </div>
+    `;
+
+    el.querySelector('[data-act="restore"]').addEventListener('click', () => restoreItem(item.id));
+    el.querySelector('[data-act="delete"]').addEventListener('click', () => permaDeleteItem(item.id));
+
+    return el;
+  }
+
+  function restoreItem(trashId) {
+    const idx = state.trash.findIndex(t => t.id === trashId);
+    if (idx < 0) return;
+    const item = state.trash[idx];
+
+    if (item.type === 'column') {
+      // Restore to end of columns, but avoid ID collision
+      const restored = structuredClone(item.data);
+      if (state.columns.some(c => c.id === restored.id)) {
+        restored.id = 'col_' + uid();
+      }
+      state.columns.push(restored);
+    } else if (item.type === 'entry') {
+      // Restore to original column if it exists, otherwise to first column
+      const col = state.columns.find(c => c.id === item.context.columnId) || state.columns[0];
+      if (!col) {
+        alert('No column available to restore into. Create a column first.');
+        return;
+      }
+      col.entries.push(structuredClone(item.data));
+    } else if (item.type === 'comment') {
+      // Restore to original entry if it still exists
+      const r = findEntry(item.context.entryId);
+      if (!r) {
+        alert('The original card no longer exists. Cannot restore this comment.');
+        return;
+      }
+      r.entry.comments = r.entry.comments || [];
+      r.entry.comments.push(structuredClone(item.data));
+    }
+
+    state.trash.splice(idx, 1);
+    saveState();
+    renderTrash();
+    render();
+    showToast('Restored');
+  }
+
+  function permaDeleteItem(trashId) {
+    const item = state.trash.find(t => t.id === trashId);
+    if (!item) return;
+    if (!confirm('Permanently delete this item? This cannot be undone.')) return;
+    state.trash = state.trash.filter(t => t.id !== trashId);
+    saveState();
+    renderTrash();
+    showToast('Deleted permanently');
+  }
+
+  function emptyBin() {
+    if (!state.trash || state.trash.length === 0) return;
+    const n = state.trash.length;
+
+    // First confirm
+    if (!confirm(`Empty the Trash Bin? This will permanently delete all ${n} item${n > 1 ? 's' : ''} inside.`)) return;
+
+    // Second confirm — final "are you sure"
+    if (!confirm(`Are you sure? This cannot be undone.\n\nClick OK to permanently delete all ${n} item${n > 1 ? 's' : ''}.`)) return;
+
+    state.trash = [];
+    saveState();
+    renderTrash();
+    render();
+    showToast('Trash Bin emptied');
+  }
+
+  // Close modals on Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (document.getElementById('full-view-modal').classList.contains('open')) {
+      closeFullView();
+    } else if (document.getElementById('trash-modal').classList.contains('open')) {
+      closeTrash();
+    }
+  });
+
+  // ============= GIST SYNC =============
+  const SYNC_TOKEN_KEY = 'work-dashboard-sync-token';
+  const SYNC_GIST_KEY = 'work-dashboard-sync-gist';
+  const GIST_FILENAME = 'dashboard.json';
+
+  let syncStatus = 'idle'; // idle | syncing | synced | error | offline
+  let pushTimer = null;
+  let lastRemoteHash = null;
+
+  function getSyncToken() { return localStorage.getItem(SYNC_TOKEN_KEY) || ''; }
+  function getSyncGistId() { return localStorage.getItem(SYNC_GIST_KEY) || ''; }
+  function isSyncConfigured() { return !!(getSyncToken() && getSyncGistId()); }
+
+  function setSyncStatus(s, detail) {
+    syncStatus = s;
+    const btn = document.getElementById('sync-btn');
+    if (btn) {
+      const labels = {
+        idle:    'Cloud Sync',
+        syncing: 'Syncing…',
+        synced:  'Cloud Sync ✓',
+        error:   'Sync ⚠',
+        offline: 'Offline'
+      };
+      btn.textContent = labels[s] || 'Cloud Sync';
+    }
+    renderSyncStatusBlock();
+    if (detail) console.log('[sync]', s, detail);
+  }
+
+  function openSyncModal() {
+    document.getElementById('sync-token').value = getSyncToken();
+    document.getElementById('sync-gist-id').value = getSyncGistId();
+    renderSyncStatusBlock();
+    document.getElementById('sync-modal').classList.add('open');
+  }
+
+  function closeSyncModal() {
+    document.getElementById('sync-modal').classList.remove('open');
+  }
+
+  function renderSyncStatusBlock() {
+    const block = document.getElementById('sync-status-block');
+    if (!block) return;
+    if (!isSyncConfigured()) {
+      block.innerHTML = `<div style="padding:12px 14px; background:rgba(166,93,30,0.08); border-left:2px solid #a65d1e; font-size:12px; color:var(--ink-soft);">Not connected. Enter a token and gist ID below to enable cloud sync.</div>`;
+    } else {
+      const labels = {
+        idle:    { bg: 'rgba(0,0,0,0.04)', color: '#4a4842', text: 'Ready' },
+        syncing: { bg: 'rgba(166,93,30,0.08)', color: '#a65d1e', text: 'Syncing to GitHub Gist…' },
+        synced:  { bg: 'rgba(45,90,61,0.08)', color: '#2d5a3d', text: 'Synced with GitHub Gist' },
+        error:   { bg: 'rgba(139,46,46,0.08)', color: '#8b2e2e', text: 'Sync error — check token and gist ID' },
+        offline: { bg: 'rgba(0,0,0,0.04)', color: '#4a4842', text: 'Offline — changes will sync when reconnected' }
+      };
+      const s = labels[syncStatus] || labels.idle;
+      block.innerHTML = `<div style="padding:12px 14px; background:${s.bg}; border-left:2px solid ${s.color}; font-size:12px; color:${s.color}; font-weight:500;">${s.text}</div>`;
+    }
+  }
+
+  async function saveSyncSettings() {
+    const token = document.getElementById('sync-token').value.trim();
+    const gistId = document.getElementById('sync-gist-id').value.trim();
+    if (!token || !gistId) {
+      alert('Please enter both a token and a gist ID.');
+      return;
+    }
+    localStorage.setItem(SYNC_TOKEN_KEY, token);
+    localStorage.setItem(SYNC_GIST_KEY, gistId);
+    setSyncStatus('syncing');
+    try {
+      // Test by pulling
+      const remote = await fetchGist();
+      setSyncStatus('synced');
+      if (remote && remote.columns) {
+        if (confirm('Found existing data in the gist. Use remote data (replace local) or keep local (and push it to remote)?\n\nOK = use remote data\nCancel = keep local and push')) {
+          state = remote;
+          if (!state.trash) state.trash = [];
+          saveState({ skipPush: true });
+          render();
+          showToast('Pulled from Gist');
+        } else {
+          await pushToGist(false);
+          showToast('Pushed local to Gist');
+        }
+      } else {
+        // Empty gist — push current
+        await pushToGist(false);
+        showToast('Connected and pushed to Gist');
+      }
+    } catch (err) {
+      setSyncStatus('error', err.message);
+      alert('Sync failed: ' + err.message);
+    }
+  }
+
+  function disconnectSync() {
+    if (!confirm('Disconnect cloud sync? Local data will remain.')) return;
+    localStorage.removeItem(SYNC_TOKEN_KEY);
+    localStorage.removeItem(SYNC_GIST_KEY);
+    setSyncStatus('idle');
+    showToast('Disconnected');
+  }
+
+  async function fetchGist() {
+    const token = getSyncToken();
+    const gistId = getSyncGistId();
+    const res = await fetch(`https://api.github.com/gists/${gistId}`, {
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github+json'
+      }
+    });
+    if (!res.ok) throw new Error(`GitHub API ${res.status}`);
+    const data = await res.json();
+    const file = data.files && data.files[GIST_FILENAME];
+    if (!file) {
+      // Gist exists but file missing — look for any .json file
+      const anyJson = data.files && Object.values(data.files).find(f => f.filename.endsWith('.json'));
+      if (!anyJson) return null;
+      return JSON.parse(anyJson.content);
+    }
+    if (!file.content || !file.content.trim()) return null;
+    try {
+      return JSON.parse(file.content);
+    } catch {
+      return null;
+    }
+  }
+
+  async function pushToGist(showStatus) {
+    if (!isSyncConfigured()) return;
+    const token = getSyncToken();
+    const gistId = getSyncGistId();
+    if (showStatus) setSyncStatus('syncing');
+    try {
+      const payload = cleanForExport(state);
+      const body = {
+        files: {
+          [GIST_FILENAME]: { content: JSON.stringify(payload, null, 2) }
+        }
+      };
+      const res = await fetch(`https://api.github.com/gists/${gistId}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `token ${token}`,
+          'Accept': 'application/vnd.github+json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) throw new Error(`GitHub API ${res.status}`);
+      setSyncStatus('synced');
+      if (showStatus) showToast('Pushed to Gist');
+    } catch (err) {
+      setSyncStatus(navigator.onLine ? 'error' : 'offline', err.message);
+      if (showStatus) alert('Push failed: ' + err.message);
+    }
+  }
+
+  async function pullFromGist(showStatus) {
+    if (!isSyncConfigured()) return;
+    if (showStatus) setSyncStatus('syncing');
+    try {
+      const remote = await fetchGist();
+      if (remote && remote.columns) {
+        if (showStatus && !confirm('This will replace your local data with the gist version. Continue?')) {
+          setSyncStatus('synced');
+          return;
+        }
+        state = remote;
+        if (!state.trash) state.trash = [];
+        saveState({ skipPush: true });
+        render();
+        setSyncStatus('synced');
+        if (showStatus) showToast('Pulled from Gist');
+      } else {
+        setSyncStatus('synced');
+        if (showStatus) showToast('Gist is empty');
+      }
+    } catch (err) {
+      setSyncStatus(navigator.onLine ? 'error' : 'offline', err.message);
+      if (showStatus) alert('Pull failed: ' + err.message);
+    }
+  }
+
+  // Debounced push — every save triggers this; actual push happens after 2s of idle
+  function schedulePush() {
+    if (!isSyncConfigured()) return;
+    clearTimeout(pushTimer);
+    pushTimer = setTimeout(() => pushToGist(false), 2000);
+  }
+
+  // Online/offline hooks
+  window.addEventListener('online', () => {
+    if (isSyncConfigured()) {
+      setSyncStatus('syncing');
+      pushToGist(false);
+    }
+  });
+  window.addEventListener('offline', () => setSyncStatus('offline'));
+
+  // Initial pull on page load
+  async function initialSync() {
+    if (!isSyncConfigured()) {
+      setSyncStatus('idle');
+      return;
+    }
+    setSyncStatus('syncing');
+    await pullFromGist(false);
+  }
+
+  // ============= EXPORT / IMPORT =============
+  function cleanForExport(data) {
+    // Strip transient flags (those starting with _)
+    const clone = structuredClone(data);
+    const strip = (entries) => {
+      entries.forEach(e => {
+        Object.keys(e).forEach(k => { if (k.startsWith('_')) delete e[k]; });
+        if (e.children) strip(e.children);
+      });
+    };
+    clone.columns.forEach(col => {
+      Object.keys(col).forEach(k => { if (k.startsWith('_')) delete col[k]; });
+      strip(col.entries);
+    });
+    return clone;
+  }
+
+  function exportData() {
+    const payload = cleanForExport(state);
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const stamp = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = `dashboard-${stamp}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Exported to JSON');
+  }
+
+  function importData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (!data.columns || !Array.isArray(data.columns)) throw new Error('Invalid format');
+        if (!confirm('This will replace your current dashboard. Continue?')) return;
+        if (!data.trash) data.trash = [];
+        state = data;
+        saveState(); render();
+        showToast('Imported successfully');
+      } catch (err) {
+        alert('Import failed: ' + err.message);
+      }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+  }
+
+  // ============= INIT =============
+  render();
+  initialSync();
+</script>
+</body>
+</html>
